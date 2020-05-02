@@ -51,7 +51,7 @@ import datetime as dt
 
 #load data and edit "Charge column" since that column has weird numbers & letter conventions 
 
-os.chdir('/Users/paulinemckim/Desktop')
+os.chdir('./data/')
 balti = pd.read_csv('Balti_data.csv', dtype={"Charge":str})
 
 dfChkBasics(balti, True)
