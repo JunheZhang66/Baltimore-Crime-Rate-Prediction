@@ -467,6 +467,51 @@ balti_Charge.shape
 balti_Charge.Charge.unique()
 balti_Charge=balti_Charge.dropna()
 print(balti_Charge.head())
+
+#SOME VISUALIZATION CHARTS/EDA
+balti['Sex'].value_counts().plot(kind='barh')
+balti['District'].value_counts().plot.pie(subplots=True, figsize=(9, 15))
+balti['Age'].value_counts().plot.pie(subplots=True, figsize=(9, 15))
+balti['ChargeDescriptionClean'].value_counts().plot(kind='barh')
+balti['Daynight'].value_counts().plot.pie(subplots=True, figsize=(9, 15))
+balti['Season'].value_counts().plot.pie(subplots=True, figsize=(9, 15))
+sns.barplot(x='Sex', y='Age', hue='Daynight', data=balti,saturation=0.8)
+sns.barplot(x='District', y='Age', hue='Sex', data=balti,saturation=0.8)
+sex_groups =balti.groupby('Sex').groups
+male_ind = sex_groups['M']
+female_ind = sex_groups['F']
+plt.hist([balti.loc[male_ind,'Age'],balti.loc[female_ind,'Age']], 20, density = 1, histtype = 'bar', stacked=True, label = balti['Sex'].unique())
+plt.xlabel('Age')
+plt.title('Age by Sex')
+plt.legend()
+plt.show()
+sns.heatmap(pd.crosstab(balti['Sex'],balti['ChargeDescriptionClean'], normalize=True),vmin=0,vmax=1,annot=True,cbar_kws={'label': 'Fraction'})
+pd.crosstab(balti['Sex'],balti['ChargeDescriptionClean'])
+
+#COMPUTATION OF CHI2
+#DROPPING VARIABLES THAT WE DO NOT WANT
+mybaltichi=balti.drop(['Arrest', 'Age','Race', 'ArrestDate', 'ArrestTime', 'ArrestLocation', 'IncidentOffense', 'IncidentLocation', 'Charge', 'ChargeDescription', 'Neighborhood','Post','Longitude','Latitude','Location 1','Max.TemperatureF','Mean.TemperatureF','Min.TemperatureF','PrecipitationIn','Unnamed: 5','Unnamed: 6'], axis = 1) 
+
+#DEFINING THE FUNCTION
+
+from scipy.stats import chi2, chi2_contingency
+from itertools import combinations
+
+
+def get_corr_mat(df, f=chi2_contingency):
+    columns = df.columns
+    dm = pd.DataFrame(index=columns, columns=columns)
+    for var1, var2 in combinations(columns, 2):
+        cont_table = pd.crosstab(df[var1], df[var2], margins=False)
+        chi2_stat = f(cont_table)[0]
+        dm.loc[var2, var1] = chi2_stat
+        dm.loc[var1, var2] = chi2_stat
+    dm.fillna(0, inplace=True)
+    return dm
+
+get_corr_mat(mybaltichi)
+
+
 #%%
 # KNN Models
 
